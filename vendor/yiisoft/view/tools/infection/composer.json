@@ -1,0 +1,10 @@
+{
+    "require-dev": {
+        "infection/infection": "^0.26.21 || ^0.32.3"
+    },
+    "config": {
+        "allow-plugins": {
+            "infection/extension-installer": true
+        }
+    }
+}

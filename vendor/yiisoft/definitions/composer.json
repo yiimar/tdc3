@@ -1,0 +1,71 @@
+{
+    "name": "yiisoft/definitions",
+    "type": "library",
+    "description": "The package provides definition syntax",
+    "keywords": [
+        "definitions"
+    ],
+    "homepage": "https://www.yiiframework.com/",
+    "license": "BSD-3-Clause",
+    "support": {
+        "issues": "https://github.com/yiisoft/definitions/issues?state=open",
+        "source": "https://github.com/yiisoft/definitions",
+        "forum": "https://www.yiiframework.com/forum/",
+        "wiki": "https://www.yiiframework.com/wiki/",
+        "irc": "ircs://irc.libera.chat:6697/yii",
+        "chat": "https://t.me/yii3en"
+    },
+    "funding": [
+        {
+            "type": "opencollective",
+            "url": "https://opencollective.com/yiisoft"
+        },
+        {
+            "type": "github",
+            "url": "https://github.com/sponsors/yiisoft"
+        }
+    ],
+    "require": {
+        "php": "8.1 - 8.5",
+        "psr/container": "^1.0 || ^2.0"
+    },
+    "require-dev": {
+        "bamarni/composer-bin-plugin": "^1.8.3",
+        "friendsofphp/php-cs-fixer": "^3.69",
+        "maglnet/composer-require-checker": "^4.7.1",
+        "phpunit/phpunit": "^10.5.45",
+        "rector/rector": "^2.0.9",
+        "spatie/phpunit-watcher": "^1.24",
+        "yiisoft/test-support": "^3.0.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Yiisoft\\Definitions\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Yiisoft\\Definitions\\Tests\\": "tests"
+        }
+    },
+    "extra": {
+        "bamarni-bin": {
+            "bin-links": true,
+            "target-directory": "tools",
+            "forward-command": true
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "bamarni/composer-bin-plugin": true,
+            "composer/package-versions-deprecated": true
+        }
+    },
+    "scripts": {
+        "php-cs-fixer": "PHP_CS_FIXER_IGNORE_ENV=1 php-cs-fixer fix",
+        "rector": "rector",
+        "test": "phpunit --testdox --no-interaction",
+        "test-watch": "phpunit-watcher watch"
+    }
+}

@@ -1,0 +1,72 @@
+{
+    "name": "yiisoft/config",
+    "type": "composer-plugin",
+    "description": "Composer plugin and a library for config assembling",
+    "keywords": [
+        "composer",
+        "config",
+        "plugin"
+    ],
+    "homepage": "https://github.com/yiisoft/config",
+    "license": "BSD-3-Clause",
+    "support": {
+        "issues": "https://github.com/yiisoft/config/issues?state=open",
+        "source": "https://github.com/yiisoft/config",
+        "forum": "https://www.yiiframework.com/forum/",
+        "wiki": "https://www.yiiframework.com/wiki/",
+        "irc": "ircs://irc.libera.chat:6697/yii",
+        "chat": "https://t.me/yii3en"
+    },
+    "funding": [
+        {
+            "type": "opencollective",
+            "url": "https://opencollective.com/yiisoft"
+        },
+        {
+            "type": "github",
+            "url": "https://github.com/sponsors/yiisoft"
+        }
+    ],
+    "require": {
+        "php": "8.1 - 8.5",
+        "composer-plugin-api": "^2.0",
+        "symfony/console": "^5.4.11 || ^6.0.11 || ^7 || ^8",
+        "yiisoft/arrays": "^3.0",
+        "yiisoft/strings": "^2.0",
+        "yiisoft/var-dumper": "^1.1"
+    },
+    "require-dev": {
+        "bamarni/composer-bin-plugin": "^1.8.3",
+        "composer/composer": "^2.8.5",
+        "phpunit/phpunit": "^10.5.44",
+        "rector/rector": "^2.0.7"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "bamarni/composer-bin-plugin": true,
+            "composer/package-versions-deprecated": true
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Yiisoft\\Config\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Yiisoft\\Config\\Tests\\": "tests"
+        }
+    },
+    "extra": {
+        "class": "Yiisoft\\Config\\Composer\\EventHandler",
+        "bamarni-bin": {
+            "bin-links": true,
+            "target-directory": "tools",
+            "forward-command": true
+        }
+    },
+    "scripts": {
+        "test": "phpunit --testdox --no-interaction"
+    }
+}

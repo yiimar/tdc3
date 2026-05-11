@@ -1,0 +1,93 @@
+{
+    "name": "yiisoft/view",
+    "type": "library",
+    "description": "Yii View Rendering Library",
+    "keywords": [
+        "yii",
+        "view"
+    ],
+    "homepage": "https://www.yiiframework.com/",
+    "license": "BSD-3-Clause",
+    "support": {
+        "issues": "https://github.com/yiisoft/view/issues?state=open",
+        "source": "https://github.com/yiisoft/view",
+        "forum": "https://www.yiiframework.com/forum/",
+        "wiki": "https://www.yiiframework.com/wiki/",
+        "irc": "ircs://irc.libera.chat:6697/yii",
+        "chat": "https://t.me/yii3en"
+    },
+    "funding": [
+        {
+            "type": "opencollective",
+            "url": "https://opencollective.com/yiisoft"
+        },
+        {
+            "type": "github",
+            "url": "https://github.com/sponsors/yiisoft"
+        }
+    ],
+    "require": {
+        "php": "8.1 - 8.5",
+        "yiisoft/arrays": "^2.0 || ^3.0",
+        "yiisoft/cache": "^1.0 || ^2.0 || ^3.0",
+        "yiisoft/files": "^1.0 || ^2.0",
+        "yiisoft/html": "^2.5 || ^3.0 || ^4.0",
+        "yiisoft/json": "^1.0"
+    },
+    "require-dev": {
+        "bamarni/composer-bin-plugin": "^1.8.3",
+        "friendsofphp/php-cs-fixer": "^3.93",
+        "maglnet/composer-require-checker": "^4.7.1",
+        "phpbench/phpbench": "^1.4.3",
+        "phpunit/phpunit": "^10.5.60",
+        "rector/rector": "^2.3.4",
+        "spatie/phpunit-watcher": "^1.24.4",
+        "yiisoft/aliases": "^3.1.1",
+        "yiisoft/code-style": "^1.0",
+        "yiisoft/di": "^1.4.1",
+        "yiisoft/psr-dummy-provider": "^1.0.2",
+        "yiisoft/test-support": "^3.1.0"
+    },
+    "extra": {
+        "config-plugin-options": {
+            "source-directory": "config"
+        },
+        "config-plugin": {
+            "params": "params.php",
+            "di": "di.php",
+            "di-web": "di-web.php"
+        },
+        "bamarni-bin": {
+            "bin-links": true,
+            "target-directory": "tools",
+            "forward-command": true
+        }
+    },
+    "suggestion": {
+        "psr/event-dispatcher": "Use any PSR-compatible event dispatcher to dispatch `View`/`WebView` events."
+    },
+    "autoload": {
+        "psr-4": {
+            "Yiisoft\\View\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Yiisoft\\View\\Tests\\": "tests"
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "bamarni/composer-bin-plugin": true,
+            "composer/package-versions-deprecated": true
+        }
+    },
+    "scripts": {
+        "bench": "phpbench run",
+        "cs-fix": "php-cs-fixer fix",
+        "infection": "infection --threads=max",
+        "test": "phpunit --testdox",
+        "test-watch": "phpunit-watcher watch"
+    }
+}
