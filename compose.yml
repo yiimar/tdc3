@@ -1,0 +1,234 @@
+services:
+# @todo add .env definitions
+# @todo fill app/docker
+    traefik:
+        image: traefik:3.6
+        command:
+            --providers.docker=true
+            --providers.docker.exposedByDefault=false
+            --entryPoints.http.address=:80
+        ports:
+            - "80:80"
+        networks:
+            - traefik-public
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+        labels:
+            - traefik.enable=true
+            - traefik.docker.network=traefik-public
+    app:
+        build:
+            context: app/docker
+            dockerfile: dev/nginx/Dockerfile
+        volumes:
+            - ./app:/app
+        networks:
+            - traefik-public
+            - default
+        labels:
+            - traefik.enable=true
+            - traefik.docker.network=traefik-public
+            - traefik.http.routers.app.rule=Host(`app.localhost`)
+            - traefik.http.routers.app.entryPoints=http
+            - traefik.http.services.app.loadBalancer.server.port=80
+
+    app-php-fpm:
+        build:
+            context: app/docker
+            dockerfile: dev/php-fpm/Dockerfile
+            args:
+                GID: ${GID:-1000}
+                UID: ${UID:-1000}
+        environment:
+            APP_ENV: dev
+            APP_DEBUG: 1
+            PHP_IDE_CONFIG: serverName=API
+            DB_HOST: db
+            DB_USER: app
+            DB_PASSWORD_FILE: /run/secrets/app_db_password
+            DB_NAME: app
+            MAILER_HOST: mailer
+            MAILER_PORT: 1025
+            MAILER_USERNAME: app
+            MAILER_PASSWORD_FILE: /run/secrets/app_mailer_password
+            MAILER_FROM_EMAIL: mail@app.test
+            FRONTEND_URL: http://localhost
+            SENTRY_DSN_FILE: /run/secrets/sentry_dsn
+            JWT_ENCRYPTION_KEY_FILE: /run/secrets/jwt_encryption_key
+            JWT_PUBLIC_KEY_PATH: /run/secrets/jwt_public_key
+            JWT_PRIVATE_KEY_PATH: /run/secrets/jwt_private_key
+            OAUTH_CALLBACK_URL: http://app.localhost
+            OAUTH_YANDEX_AUTH_URL: http://wiremock.localhost/oauth.yandex.ru
+            OAUTH_YANDEX_TOKEN_URL: http://wiremock:8080/oauth.yandex.ru
+            OAUTH_YANDEX_API_URL: http://wiremock:8080/login.yandex.ru
+            OAUTH_YANDEX_CLIENT_ID: app
+            OAUTH_YANDEX_CLIENT_SECRET_FILE: /run/secrets/oauth_yandex_client_secret
+            OAUTH_MAILRU_AUTH_URL: http://wiremock.localhost/oauth.mail.ru
+            OAUTH_MAILRU_TOKEN_URL: http://wiremock:8080/oauth.mail.ru
+            OAUTH_MAILRU_API_URL: http://wiremock:8080/oauth.mail.ru
+            OAUTH_MAILRU_CLIENT_ID: app
+            OAUTH_MAILRU_CLIENT_SECRET_FILE: /run/secrets/oauth_mailru_client_secret
+        volumes:
+            - ./app:/app
+        secrets:
+            - app_db_password
+            - app_mailer_password
+            - sentry_dsn
+            - jwt_encryption_key
+            - jwt_public_key
+            - jwt_private_key
+            - oauth_yandex_client_secret
+            - oauth_mailru_client_secret
+
+    app-php-cli:
+        build:
+            context: app/docker
+            dockerfile: dev/php-cli/Dockerfile
+            args:
+                GID: ${GID:-1000}
+                UID: ${UID:-1000}
+        environment:
+            # TODO Remove after PHP 8.4 support
+            PHP_CS_FIXER_IGNORE_ENV: 1
+            APP_ENV: dev
+            APP_DEBUG: 1
+            DB_HOST: db
+            DB_USER: app
+            DB_PASSWORD_FILE: /run/secrets/app_db_password
+            DB_NAME: app
+            MAILER_HOST: mailer
+            MAILER_PORT: 1025
+            MAILER_USERNAME: app
+            MAILER_PASSWORD_FILE: /run/secrets/app_mailer_password
+            MAILER_FROM_EMAIL: mail@app.test
+            FRONTEND_URL: http://localhost
+            SENTRY_DSN_FILE: /run/secrets/sentry_dsn
+            JWT_ENCRYPTION_KEY_FILE: /run/secrets/jwt_encryption_key
+            JWT_PUBLIC_KEY_PATH: /run/secrets/jwt_public_key
+            JWT_PRIVATE_KEY_PATH: /run/secrets/jwt_private_key
+            OAUTH_CALLBACK_URL: http://app.localhost
+            OAUTH_YANDEX_CLIENT_ID: app
+            OAUTH_YANDEX_CLIENT_SECRET_FILE: /run/secrets/oauth_yandex_client_secret
+            OAUTH_MAILRU_CLIENT_ID: app
+            OAUTH_MAILRU_CLIENT_SECRET_FILE: /run/secrets/oauth_mailru_client_secret
+        volumes:
+            - ./app:/app
+        secrets:
+            - app_db_password
+            - app_mailer_password
+            - sentry_dsn
+            - jwt_encryption_key
+            - jwt_public_key
+            - jwt_private_key
+            - oauth_yandex_client_secret
+            - oauth_mailru_client_secret
+
+    db:
+        image: postgres:18-alpine
+        environment:
+            POSTGRES_USER: app
+            POSTGRES_PASSWORD_FILE: /run/secrets/app_db_password
+            POSTGRES_DB: app
+        secrets:
+            - app_db_password
+        volumes:
+            - db:/var/lib/postgresql/data
+        ports:
+            - "5432:5432"
+
+    db-backup:
+        build:
+            context: ./app/docker/common
+            dockerfile: postgres-backup/Dockerfile
+        environment:
+            BACKUP_NAME: spoco_db
+            POSTGRES_HOST: db
+            POSTGRES_DB: app
+            POSTGRES_USERNAME: app
+            POSTGRES_PASSWORD_FILE: /run/secrets/app_db_password
+            AWS_ACCESS_KEY_ID: storage_app
+            AWS_SECRET_ACCESS_KEY_FILE: /run/secrets/backup_aws_secret_access_key
+            AWS_DEFAULT_REGION: region
+            S3_ENDPOINT: http://backup-storage:9090
+            S3_BUCKET: backup
+        secrets:
+            - app_db_password
+            - backup_aws_secret_access_key
+        volumes:
+            - db-backup:/app
+        command: ["sh", "-c", "wait-for-it db:5432 -t 20 && exec backup"]
+
+    mailer:
+        image: axllent/mailpit:v1.27
+        environment:
+            MP_SMTP_AUTH_ACCEPT_ANY: 1
+            MP_SMTP_AUTH_ALLOW_INSECURE: 1
+        networks:
+            - traefik-public
+            - default
+        labels:
+            - traefik.enable=true
+            - traefik.docker.network=traefik-public
+            - traefik.http.routers.mailer.rule=Host(`mailer.localhost`)
+            - traefik.http.routers.mailer.entryPoints=http
+            - traefik.http.services.mailer.loadBalancer.server.port=8025
+
+    backup-storage:
+        image: adobe/s3mock:4.11.0
+        environment:
+            COM_ADOBE_TESTING_S3MOCK_STORE_INITIAL_BUCKETS: backup
+            COM_ADOBE_TESTING_S3MOCK_STORE_ROOT: data
+        volumes:
+            - backup-storage:/data
+        networks:
+            - traefik-public
+            - default
+        labels:
+            - traefik.enable=true
+            - traefik.docker.network=traefik-public
+            - traefik.http.routers.backup-storage.rule=Host(`backup-storage.localhost`)
+            - traefik.http.routers.backup-storage.entryPoints=http
+            - traefik.http.services.backup-storage.loadBalancer.server.port=9090
+
+    adminer:
+        image: adminer:${ADMINER_VERSION}
+        container_name: ${APP_NAME}_adminer
+        restart: unless-stopped
+        ports:
+            - "${ADMINER_PORT_HOST}:${ADMINER_PORT_CONTAINER}"
+        environment:
+            ADMINER_DEFAULT_SERVER: db
+            ADMINER_DB_USER: ${DB_USER}
+            ADMINER_DB_PASSWORD: ${DB_PASSWORD}
+            ADMINER_DB_NAME: ${DB_NAME}
+        depends_on:
+            - db
+
+secrets:
+    app_db_password:
+        file: ./docker/dev/secrets/app_db_password
+    app_mailer_password:
+        file: ./docker/dev/secrets/app_mailer_password
+    sentry_dsn:
+        file: ./docker/dev/secrets/sentry_dsn
+    jwt_encryption_key:
+        file: ./docker/dev/secrets/jwt_encryption_key
+    jwt_public_key:
+        file: ./docker/dev/secrets/jwt_public_key
+    jwt_private_key:
+        file: ./docker/dev/secrets/jwt_private_key
+    oauth_yandex_client_secret:
+        file: ./docker/dev/secrets/oauth_yandex_client_secret
+    oauth_mailru_client_secret:
+        file: ./docker/dev/secrets/oauth_mailru_client_secret
+    backup_aws_secret_access_key:
+        file: ./docker/dev/secrets/backup_aws_secret_access_key
+
+volumes:
+    db:
+    db-backup:
+    backup-storage:
+
+networks:
+    traefik-public:
+        name: traefik-public
