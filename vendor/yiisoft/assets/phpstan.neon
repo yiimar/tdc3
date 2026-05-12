@@ -1,9 +1,0 @@
-parameters:
-  level: 10
-  paths:
-    - src
-  ignoreErrors:
-    - identifier: missingType.iterableValue
-
-includes:
-  - phar://phpstan.phar/conf/bleedingEdge.neon
