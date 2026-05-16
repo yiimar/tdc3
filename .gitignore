@@ -1,6 +1,31 @@
-assets/*
-!assets/.gitignore
-protected/runtime/*
-!protected/runtime/.gitignore
-protected/data/*.db
-themes/classic/views/
+# === Безопасность (Секреты и пароли) ===
+**/secrets/*
+!**/secrets/.gitkeep
+
+# === Зависимости (PHP & Node.js на любых уровнях) ===
+**/vendor/
+**/node_modules/
+
+# === Временные файлы фреймворков и сборщиков (Yii, Webpack и др.) ===
+**/runtime/
+**/assets/
+**/.cache/
+
+# === IDE & Редакторы (PhpStorm) ===
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# === Логи и временные файлы ===
+*.log
+logs/
+*.tmp
+*.bak
+
+# === Специфичные файлы ОС ===
+.DS_Store
+Thumbs.db
